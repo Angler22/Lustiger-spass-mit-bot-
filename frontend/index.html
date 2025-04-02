@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Crypto Trading Bot</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.3.1/decimal.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <svg viewBox="0 0 24 24" class="logo-icon">
+                <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" fill="#2563eb"/>
+                <path d="M12 4.2L4 8.1v7.8l8 3.9 8-3.9V8.1L12 4.2z" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+                <path d="M12 16L12 8" stroke="#ffffff" stroke-width="1.5"/>
+                <path d="M8 10L16 14" stroke="#ffffff" stroke-width="1.5"/>
+                <path d="M16 10L8 14" stroke="#ffffff" stroke-width="1.5"/>
+            </svg>
+            <h1>Crypto Trading Bot</h1>
+        </div>
+        <div class="user-controls">
+            <div id="user-info" class="hidden">
+                <span id="username">Username</span>
+                <button id="logoutBtn" class="icon-button">🚪</button>
+            </div>
+            <div id="auth-buttons">
+                <button id="loginBtn" class="auth-btn">Login</button>
+                <button id="registerBtn" class="auth-btn">Register</button>
+            </div>
+            <div class="mode-switch">
+                <span>Simulation</span>
+                <label class="switch">
+                    <input type="checkbox" id="tradingModeToggle">
+                    <span class="slider"></span>
+                </label>
+                <span>Live Trading</span>
+            </div>
+            <button id="settingsBtn" class="icon-button">⚙️</button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <nav class="sidebar">
+            <ul>
+                <li class="active" data-tab="dashboard"><span class="icon">📊</span> Dashboard</li>
+                <li data-tab="markets"><span class="icon">📈</span> Markets</li>
+                <li data-tab="strategies"><span class="icon">🧩</span> Strategies</li>
+                <li data-tab="correlations"><span class="icon">🔗</span> Correlations</li>
+                <li data-tab="backtesting"><span class="icon">⏮️</span> Backtesting</li>
+                <li data-tab="settings"><span class="icon">⚙️</span> Settings</li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <!-- Dashboard Tab -->
+            <section id="dashboard" class="tab-content active">
+                <div class="dashboard-header">
+                    <h2>Portfolio Overview</h2>
+                    <div class="time-controls">
+                        <button class="time-btn active" data-time="1d">1D</button>
+                        <button class="time-btn" data-time="1w">1W</button>
+                        <button class="time-btn" data-time="1m">1M</button>
+                        <button class="time-btn" data-time="3m">3M</button>
+                        <button class="time-btn" data-time="1y">1Y</button>
+                        <button class="time-btn" data-time="all">ALL</button>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card portfolio-value">
+                        <h3>Portfolio Value</h3>
+                        <div class="value-container">
+                            <p class="value">$0.00</p>
+                            <p class="change up">+0.00%</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="portfolioChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card market-regime">
+                        <h3>Market Regime</h3>
+                        <div class="regime-indicator">
+                            <div class="regime-dot" data-regime="trending"></div>
+                            <p class="regime-text">Trending</p>
+                        </div>
+                        <div class="regime-details">
+                            <p>Volatility: <span class="volatility-value">12.3%</span></p>
+                            <p>Confidence: <span class="confidence-value">87%</span></p>
+                        </div>
+                        <div class="active-strategy">
+                            <p>Active Strategy: <span class="strategy-name">Trend Following</span></p>
+                        </div>
+                    </div>
+
+                    <div class="card asset-allocation">
+                        <h3>Asset Allocation</h3>
+                        <div class="chart-container">
+                            <canvas id="allocationChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card recent-trades">
+                        <h3>Recent Trades</h3>
+                        <div class="trades-list">
+                            <div class="trade-item">
+                                <div class="trade-icon buy">B</div>
+                                <div class="trade-details">
+                                    <p class="trade-pair">BTC/USDT</p>
+                                    <p class="trade-time">10:45:23</p>
+                                </div>
+                                <div class="trade-values">
+                                    <p class="trade-amount">0.05 BTC</p>
+                                    <p class="trade-price">$45,230.50</p>
+                                </div>
+                            </div>
+                            <div class="trade-item">
+                                <div class="trade-icon sell">S</div>
+                                <div class="trade-details">
+                                    <p class="trade-pair">ETH/USDT</p>
+                                    <p class="trade-time">09:32:14</p>
+                                </div>
+                                <div class="trade-values">
+                                    <p class="trade-amount">1.2 ETH</p>
+                                    <p class="trade-price">$2,876.25</p>
+                                </div>
+                            </div>
+                            <!-- More trades will be added dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="card performance-metrics">
+                        <h3>Performance Metrics</h3>
+                        <div class="metrics-grid">
+                            <div class="metric">
+                                <p class="metric-title">Daily Return</p>
+                                <p class="metric-value up">+2.3%</p>
+                            </div>
+                            <div class="metric">
+                                <p class="metric-title">Weekly Return</p>
+                                <p class="metric-value up">+8.7%</p>
+                            </div>
+                            <div class="metric">
+                                <p class="metric-title">Max Drawdown</p>
+                                <p class="metric-value down">-12.5%</p>
+                            </div>
+                            <div class="metric">
+                                <p class="metric-title">Sharpe Ratio</p>
+                                <p class="metric-value">1.8</p>
+                            </div>
+                            <div class="metric">
+                                <p class="metric-title">Win Rate</p>
+                                <p class="metric-value">68%</p>
+                            </div>
+                            <div class="metric">
+                                <p class="metric-title">Profit Factor</p>
+                                <p class="metric-value">2.1</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Markets Tab -->
+            <section id="markets" class="tab-content">
+                <div class="markets-header">
+                    <h2>Market Overview</h2>
+                    <div class="market-search">
+                        <input type="text" id="marketSearch" placeholder="Search markets...">
+                    </div>
+                </div>
+
+                <div class="markets-table-container">
+                    <table class="markets-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Price</th>
+                                <th>24h Change</th>
+                                <th>24h Volume</th>
+                                <th>Market Cap</th>
+                                <th>Regime</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="marketTableBody">
+                            <!-- Market data will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="market-detail hidden" id="marketDetail">
+                    <div class="market-detail-header">
+                        <button class="back-button">← Back</button>
+                        <h3 class="market-detail-title">BTC/USDT</h3>
+                    </div>
+                    <div class="market-detail-grid">
+                        <div class="market-chart-container">
+                            <canvas id="marketDetailChart"></canvas>
+                        </div>
+                        <div class="market-indicators">
+                            <h4>Technical Indicators</h4>
+                            <div class="indicator-grid">
+                                <!-- Indicators will be populated dynamically -->
+                            </div>
+                        </div>
+                        <div class="market-trading">
+                            <h4>Trading</h4>
+                            <div class="trading-actions">
+                                <button class="buy-btn">Buy</button>
+                                <button class="sell-btn">Sell</button>
+                            </div>
+                            <div class="strategy-selector">
+                                <label for="marketStrategy">Strategy:</label>
+                                <select id="marketStrategy">
+                                    <option value="trend">Trend Following</option>
+                                    <option value="mean_reversion">Mean Reversion</option>
+                                    <option value="market_making">Market Making</option>
+                                    <option value="optimized">Optimized (AI)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Strategies Tab -->
+            <section id="strategies" class="tab-content">
+                <div class="strategies-header">
+                    <h2>Trading Strategies</h2>
+                    <button id="newStrategyBtn" class="action-button">
+                        <span>+</span> New Strategy
+                    </button>
+                </div>
+
+                <div class="strategies-grid">
+                    <div class="strategy-card">
+                        <div class="strategy-header">
+                            <h3>Trend Following</h3>
+                            <div class="strategy-status active">Active</div>
+                        </div>
+                        <div class="strategy-description">
+                            <p>Uses EMA crossovers to identify and follow market trends.</p>
+                        </div>
+                        <div class="strategy-params">
+                            <div class="param">
+                                <span class="param-name">Short EMA:</span>
+                                <span class="param-value">9</span>
+                            </div>
+                            <div class="param">
+                                <span class="param-name">Long EMA:</span>
+                                <span class="param-value">21</span>
+                            </div>
+                        </div>
+                        <div class="strategy-performance">
+                            <div class="performance-stat">
+                                <span class="stat-name">Return:</span>
+                                <span class="stat-value up">+12.3%</span>
+                            </div>
+                            <div class="performance-stat">
+                                <span class="stat-name">Win Rate:</span>
+                                <span class="stat-value">65%</span>
+                            </div>
+                        </div>
+                        <div class="strategy-actions">
+                            <button class="edit-btn">Edit</button>
+                            <button class="backtest-btn">Backtest</button>
+                        </div>
+                    </div>
+
+                    <div class="strategy-card">
+                        <div class="strategy-header">
+                            <h3>Mean Reversion</h3>
+                            <div class="strategy-status">Inactive</div>
+                        </div>
+                        <div class="strategy-description">
+                            <p>Trades price reversal to the mean in sideways markets.</p>
+                        </div>
+                        <div class="strategy-params">
+                            <div class="param">
+                                <span class="param-name">Grid Width:</span>
+                                <span class="param-value">2.0%</span>
+                            </div>
+                            <div class="param">
+                                <span class="param-name">Levels:</span>
+                                <span class="param-value">10</span>
+                            </div>
+                        </div>
+                        <div class="strategy-performance">
+                            <div class="performance-stat">
+                                <span class="stat-name">Return:</span>
+                                <span class="stat-value up">+8.7%</span>
+                            </div>
+                            <div class="performance-stat">
+                                <span class="stat-name">Win Rate:</span>
+                                <span class="stat-value">72%</span>
+                            </div>
+                        </div>
+                        <div class="strategy-actions">
+                            <button class="edit-btn">Edit</button>
+                            <button class="backtest-btn">Backtest</button>
+                        </div>
+                    </div>
+
+                    <div class="strategy-card">
+                        <div class="strategy-header">
+                            <h3>Market Making</h3>
+                            <div class="strategy-status">Inactive</div>
+                        </div>
+                        <div class="strategy-description">
+                            <p>Provides liquidity by placing limit orders on both sides.</p>
+                        </div>
+                        <div class="strategy-params">
+                            <div class="param">
+                                <span class="param-name">Spread:</span>
+                                <span class="param-value">0.5%</span>
+                            </div>
+                            <div class="param">
+                                <span class="param-name">Order Size:</span>
+                                <span class="param-value">5%</span>
+                            </div>
+                        </div>
+                        <div class="strategy-performance">
+                            <div class="performance-stat">
+                                <span class="stat-name">Return:</span>
+                                <span class="stat-value up">+5.2%</span>
+                            </div>
+                            <div class="performance-stat">
+                                <span class="stat-name">Win Rate:</span>
+                                <span class="stat-value">81%</span>
+                            </div>
+                        </div>
+                        <div class="strategy-actions">
+                            <button class="edit-btn">Edit</button>
+                            <button class="backtest-btn">Backtest</button>
+                        </div>
+                    </div>
+
+                    <div class="strategy-card add-strategy">
+                        <div class="add-strategy-content">
+                            <div class="add-icon">+</div>
+                            <p>Create New Strategy</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Correlations Tab -->
+            <section id="correlations" class="tab-content">
+                <div class="correlations-header">
+                    <h2>Cryptocurrency Correlation Dashboard</h2>
+                    <div class="coins-filter">
+                        <button class="coin-btn active" data-coin="bitcoin">BTC</button>
+                        <button class="coin-btn" data-coin="ethereum">ETH</button>
+                        <button class="coin-btn" data-coin="ripple">XRP</button>
+                        <button class="coin-btn" data-coin="solana">SOL</button>
+                        <button class="coin-btn" data-coin="tether">USDT</button>
+                        <button class="coin-btn" data-coin="binancecoin">BNB</button>
+                    </div>
+                </div>
+
+                <div class="correlation-stats">
+                    <div class="stat-card">
+                        <h3>Total Correlated</h3>
+                        <p class="stat-value">42</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>High Correlation (>0.8)</h3>
+                        <p class="stat-value">18</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Outperforming</h3>
+                        <p class="stat-value positive">15</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Underperforming</h3>
+                        <p class="stat-value negative">27</p>
+                    </div>
+                </div>
+
+                <div class="correlation-table-container">
+                    <table class="correlation-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Symbol</th>
+                                <th>Correlation</th>
+                                <th>Performance Delta</th>
+                                <th>Current Price</th>
+                                <th>24h Volume</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="correlationTableBody">
+                            <!-- Correlation data will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Backtesting Tab -->
+            <section id="backtesting" class="tab-content">
+                <div class="backtesting-header">
+                    <h2>Strategy Backtesting</h2>
+                </div>
+
+                <div class="backtesting-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="backtest-symbol">Symbol</label>
+                            <input type="text" id="backtest-symbol" placeholder="bitcoin">
+                        </div>
+                        <div class="form-group">
+                            <label for="backtest-strategy">Strategy</label>
+                            <select id="backtest-strategy">
+                                <option value="trend">Trend Following</option>
+                                <option value="mean_reversion">Mean Reversion</option>
+                                <option value="market_making">Market Making</option>
+                                <option value="optimized">Optimized (AI)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="backtest-start">Start Date</label>
+                            <input type="date" id="backtest-start">
+                        </div>
+                        <div class="form-group">
+                            <label for="backtest-end">End Date</label>
+                            <input type="date" id="backtest-end">
+                        </div>
+                        <div class="form-group">
+                            <label for="backtest-capital">Initial Capital</label>
+                            <input type="number" id="backtest-capital" value="10000">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button id="runBacktestBtn" class="action-button">Run Backtest</button>
+                    </div>
+                </div>
+
+                <div class="backtest-results hidden" id="backtestResults">
+                    <div class="results-header">
+                        <h3>Backtest Results</h3>
+                        <button class="export-btn">Export Results</button>
+                    </div>
+                    <div class="results-summary">
+                        <div class="summary-card">
+                            <h4>Final Capital</h4>
+                            <p class="value">$12,456.78</p>
+                            <p class="change positive">+24.57%</p>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Total Trades</h4>
+                            <p class="value">42</p>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Win Rate</h4>
+                            <p class="value">68%</p>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Profit Factor</h4>
+                            <p class="value">2.1</p>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Max Drawdown</h4>
+                            <p class="value negative">-12.5%</p>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Sharpe Ratio</h4>
+                            <p class="value">1.8</p>
+                        </div>
+                    </div>
+                    <div class="results-chart-container">
+                        <canvas id="backtestResultsChart"></canvas>
+                    </div>
+                    <div class="results-trades">
+                        <h4>Trade History</h4>
+                        <table class="trades-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Value</th>
+                                    <th>P&L</th>
+                                </tr>
+                            </thead>
+                            <tbody id="backtestTradesBody">
+                                <!-- Trade data will be populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section id="settings" class="tab-content">
+                <div class="settings-header">
+                    <h2>Bot Settings</h2>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>Exchange API Keys</h3>
+                        <div class="api-keys-form">
+                            <div class="exchange-selector">
+                                <label for="exchange-select">Select Exchange</label>
+                                <select id="exchange-select">
+                                    <option value="binance">Binance</option>
+                                    <option value="coinbase">Coinbase Pro</option>
+                                    <option value="kraken">Kraken</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="api-key">API Key</label>
+                                <input type="text" id="api-key" placeholder="Enter API key">
+                            </div>
+                            <div class="form-group">
+                                <label for="api-secret">API Secret</label>
+                                <input type="password" id="api-secret" placeholder="Enter API secret">
+                            </div>
+                            <button class="save-api-btn action-button">Save API Keys</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Risk Management</h3>
+                        <div class="risk-settings-form">
+                            <div class="form-group">
+                                <label for="max-position">Maximum Position Size (% of portfolio)</label>
+                                <input type="number" id="max-position" min="1" max="100" value="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="stop-loss">Default Stop Loss (%)</label>
+                                <input type="number" id="stop-loss" min="0.1" max="50" step="0.1" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="take-profit">Default Take Profit (%)</label>
+                                <input type="number" id="take-profit" min="0.1" max="50" step="0.1" value="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="max-trades">Maximum Concurrent Trades</label>
+                                <input type="number" id="max-trades" min="1" max="50" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="emergency-stop">Emergency Stop Threshold (%)</label>
+                                <input type="number" id="emergency-stop" min="1" max="50" value="15">
+                            </div>
+                            <button class="save-risk-btn action-button">Save Risk Settings</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Notifications</h3>
+                        <div class="notification-settings">
+                            <div class="setting-toggle">
+                                <span>Email Notifications</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="emailNotif">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="email-address">Email Address</label>
+                                <input type="email" id="email-address" placeholder="Enter email address">
+                            </div>
+                            <div class="setting-toggle">
+                                <span>Browser Notifications</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="browserNotif" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="notification-options">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="notif-trades" checked>
+                                    <label for="notif-trades">Trades</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="notif-signals" checked>
+                                    <label for="notif-signals">Strategy Signals</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="notif-alerts" checked>
+                                    <label for="notif-alerts">Price Alerts</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="notif-errors">
+                                    <label for="notif-errors">Errors Only</label>
+                                </div>
+                            </div>
+                            <button class="save-notif-btn action-button">Save Notification Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="apiKeyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>API Key Setup</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>To start trading, you need to connect your exchange API keys.</p>
+                <div class="exchange-selector">
+                    <label for="modal-exchange-select">Select Exchange</label>
+                    <select id="modal-exchange-select">
+                        <option value="binance">Binance</option>
+                        <option value="coinbase">Coinbase Pro</option>
+                        <option value="kraken">Kraken</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modal-api-key">API Key</label>
+                    <input type="text" id="modal-api-key" placeholder="Enter API key">
+                </div>
+                <div class="form-group">
+                    <label for="modal-api-secret">API Secret</label>
+                    <input type="password" id="modal-api-secret" placeholder="Enter API secret">
+                </div>
+                <p class="help-text">Note: Your API keys are stored locally and never sent to our servers.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn">Cancel</button>
+                <button class="save-btn">Save API Keys</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="strategyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Strategy Configuration</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="strategy-name">Strategy Name</label>
+                    <input type="text" id="strategy-name" placeholder="Enter strategy name">
+                </div>
+                <div class="form-group">
+                    <label for="strategy-type">Strategy Type</label>
+                    <select id="strategy-type">
+                        <option value="trend">Trend Following</option>
+                        <option value="mean_reversion">Mean Reversion</option>
+                        <option value="market_making">Market Making</option>
+                        <option value="custom">Custom Strategy</option>
+                    </select>
+                </div>
+                <div class="dynamic-parameters">
+                    <!-- Parameters will change based on selected strategy type -->
+                    <div class="parameter-group" id="trendParams">
+                        <div class="form-group">
+                            <label for="short-ema">Short EMA Period</label>
+                            <input type="number" id="short-ema" min="2" max="50" value="9">
+                        </div>
+                        <div class="form-group">
+                            <label for="long-ema">Long EMA Period</label>
+                            <input type="number" id="long-ema" min="5" max="200" value="21">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="strategy-symbols">Trading Pairs</label>
+                    <input type="text" id="strategy-symbols" placeholder="bitcoin, ethereum, ..." value="bitcoin">
+                </div>
+                <div class="form-group">
+                    <label for="position-size">Position Size (% of capital)</label>
+                    <input type="number" id="position-size" min="1" max="100" value="10">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn">Cancel</button>
+                <button class="save-btn">Save Strategy</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Login</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter password">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn">Cancel</button>
+                <button class="login-btn action-button">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Register</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" placeholder="Choose a password">
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm-password">Confirm Password</label>
+                    <input type="password" id="register-confirm-password" placeholder="Confirm your password">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn">Cancel</button>
+                <button class="register-btn action-button">Register</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notificationToast">
+        <div class="notification-content">
+            <span class="notification-message">Success! Operation completed.</span>
+            <button class="close-notification">&times;</button>
+        </div>
+    </div>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
